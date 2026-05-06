@@ -1,5 +1,26 @@
 const mongoose = require('mongoose')
 
+const replySchema = new mongoose.Schema({
+
+    text : {type:String},
+    userId : {
+        type : mongoose.Schema.Types.ObjectId,
+        ref : 'User',
+        required : true
+    },
+    publishedAt : {
+        type : Date,
+        default : Date.now
+    }
+
+},
+{
+    timestamps : true
+}
+)
+
+
+
 const commentSchema = new mongoose.Schema({
 
     // kis video par comment hai
@@ -50,7 +71,9 @@ const commentSchema = new mongoose.Schema({
     publishedAt : {
         type : Date,
         default : Date.now
-    }
+    },
+
+    reply : [replySchema]
 },
 {
     timestamps : true

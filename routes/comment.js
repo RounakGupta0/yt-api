@@ -44,7 +44,7 @@ Router.post('/add-comment/:videoid',async(req,res)=>{
 Router.get('/:videoId',async(req,res)=>{
     try
     {
-        const comments = await Comment.find({videoId : req.params.videoId}).select('commentText likeCount dislikeCount publishedAt').populate('userId','fullName imageUrl')
+        const comments = await Comment.find({videoId : req.params.videoId}).populate('userId','fullName imageUrl').populate("reply.userId",'fullName imageUrl')
         res.status(200).json({
             data : comments
         })
@@ -235,6 +235,33 @@ Router.patch('/updateComment/:commentId',async(req,res)=>{
         console.log(err)
         res.status(500).json({
             error:err
+        })
+    }
+})
+
+Router.post('/reply/:commentId',async(req,res)=>{
+    try
+    {
+        const token = req.headers.authorization.split(" ")[1]
+        const tokenData = await jwt.verify(token,process.env.SEC_KEY)
+
+        const comment = await Comment.findById(req.params.commentId)
+
+        const reply = {
+            userId : tokenData.userId,
+            text : req.body.text
+        }
+        comment.reply.push(reply)
+        await comment.save()
+        res.status(200).json({
+            comment : comment
+        })
+    }
+    catch (err)
+    {
+        console.log(err)
+        res.status(500).json({
+            error : err
         })
     }
 })
