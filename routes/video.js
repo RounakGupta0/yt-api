@@ -4,6 +4,7 @@ const Video = require('../models/Video')
 const jwt = require('jsonwebtoken')
 const cloudinary = require('cloudinary').v2
 const User = require('../models/User')
+const Comment = require('../models/Comment')
 
 cloudinary.config({
     cloud_name:process.env.CLOUD_NAME,
@@ -102,13 +103,20 @@ Router.get('/:id',async(req,res)=>{
         const video = await Video.findById(req.params.id).populate('userId','fullName imageUrl')
         //console.log(video)
         const videocreator = await User.findById(video.userId._id)
+        const comment = await Comment.find({videoId : req.params.id})
+
+        // console.log(comment)
+        // console.log(comment.length)
+        // console.log(comment.reply)
+        // const commentsCount = (comment.length) + (comment.reply.length)
 
         video.viewCount +=1
         await video.save()
 
         const result = {
             ...video._doc,
-           subscribersCount : videocreator.subscribers.length
+           subscribersCount : videocreator.subscribers.length,
+           commentCount : comment.length
         }
         // console.log(video)
 
